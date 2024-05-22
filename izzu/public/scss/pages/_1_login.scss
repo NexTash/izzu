@@ -1,0 +1,54 @@
+.for-forgot,
+.for-login {
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  height: 100vh;
+
+  .auth-form {
+    width: 100%;
+    max-width: 375px;
+    margin: auto 40px;
+    height: 400px;
+
+    .page-card {
+      padding: 20px;
+      background-color: #fff;
+      position: relative;
+      box-shadow: 0 0 15px rgba(30, 41, 59, 0.15);
+
+      .page-card-head {
+        margin-bottom: 1.5rem;
+
+        img {
+          margin-bottom: 2rem;
+          max-height: 100px;
+        }
+      }
+    }
+
+    .form-group {
+      padding: 8px;
+    }
+
+    @media (max-width: 768px) {
+      max-width: 100%;
+    }
+  }
+
+  .auth-bg {
+    flex: 1;
+    height: 100vh;
+    background-image: url("https://img.freepik.com/free-photo/business-people-shaking-hands-together_53876-20488.jpg?size=626&ext=jpg&ga=GA1.1.1880011253.1699056000&semt=sph");
+    background-position: center center;
+    background-size: cover;
+
+    @media (max-width: 768px) {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  }
+}

@@ -1,0 +1,124 @@
+/* ../../../../../tmp/tmp-58954-IsFe0JVhurrG/izzu/izzu/public/scss/izzu.bundle.css */
+@font-face {
+  font-family: "Almarai";
+  src: url(/assets/azgard9_ui/fonts//Almarai-Regular.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Almarai";
+  src: url(/assets/azgard9_ui/fonts//Almarai-Bold.ttf) format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Almarai";
+  src: url(/assets/azgard9_ui/fonts//Almarai-ExtraBold.ttf) format("truetype");
+  font-weight: 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Almarai";
+  src: url(/assets/azgard9_ui/fonts//Almarai-Light.ttf) format("truetype");
+  font-weight: lighter;
+  font-style: normal;
+}
+:root,
+[data-theme=light] {
+  --primary: rgb(74, 128, 238);
+  --secondary: rgb(39, 39, 238);
+  --secondary-color: var(--secondary);
+  --primary-color: var(--primary);
+  --btn-height: 28px;
+  --dark-green-avatar-color: #14005b;
+  --checkbox-right-margin: var(--margin-xs);
+  --checkbox-size: 14px;
+  --checkbox-focus-shadow: 0 0 0 2px var(--gray-300);
+  --checkbox-gradient: linear-gradient( 180deg, --secondary-color, -124.51%, var(--primary) 100% );
+  --font-stack:
+    "Almarai",
+    "Inter",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
+  --font-family-sans-serif:
+    "Almarai",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --font-family-monospace:
+    "Almarai",
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
+}
+.splash img {
+  max-width: 100% !important;
+}
+.chart-container {
+  position: relative;
+  font-family: var(--font-stack);
+}
+.btn.btn-primary,
+div#driver-popover-item .driver-popover-footer button.btn-primary,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn,
+.btn-primary:not(:disabled):not(.disabled):active,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle,
+div#driver-popover-item .driver-popover-footer .show > button.dropdown-toggle.driver-next-btn {
+  background-color: var(--red) !important;
+}
+.btn:not(:disabled):not(.disabled),
+div#driver-popover-item .driver-popover-footer button:not(:disabled):not(.disabled) {
+  background-color: #c03d53;
+}
+.list-paging-area .btn-group .btn-paging.btn-info,
+.footnote-area .btn-group .btn-paging.btn-info {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+  font-weight: var(--text-bold);
+}
+#navbar-breadcrumbs a {
+  color: #393737;
+}
+.for-forgot .auth-form .page-card .page-card-head img,
+.for-login .auth-form .page-card .page-card-head img {
+  max-height: 36px !important;
+}
+.for-login,
+.for-forgot,
+.for-login-with-email-link,
+.for-signup,
+.for-email-login {
+  padding: 0% !important;
+}
+.btn.btn-primary,
+div#driver-popover-item .driver-popover-footer button.btn-primary,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn {
+  background-color: red !important;
+}
+/*# sourceMappingURL=izzu.bundle.DXYKA4MP.css.map */

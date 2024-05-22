@@ -1,0 +1,8 @@
+.splash img {
+  max-width: 100% !important;
+}
+.chart-container {
+  position: relative;
+  /* for absolutely positioned tooltip */
+  font-family: var(--font-stack);
+}

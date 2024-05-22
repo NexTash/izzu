@@ -1,0 +1,42 @@
+.btn.btn-primary,
+div#driver-popover-item .driver-popover-footer button.btn-primary,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn,
+
+.btn-primary:not(:disabled):not(.disabled):active,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+div#driver-popover-item .driver-popover-footer button.driver-next-btn:not(:disabled):not(.disabled).active,
+.show>.btn-primary.dropdown-toggle,
+div#driver-popover-item .driver-popover-footer .show>button.dropdown-toggle.driver-next-btn {
+
+  background-color: var(--red) !important;
+}
+
+.btn.btn-primary, div#driver-popover-item .driver-popover-footer button.btn-primary, div#driver-popover-item .driver-popover-footer button.driver-next-btn {
+  background-color: var(--red) !important;
+  color: var(--white);
+  white-space: nowrap;
+  --icon-stroke: currentColor;
+  --icon-fill-bg: var(--red) !important;
+
+.list-paging-area .btn-group .btn-paging.btn-info,
+.footnote-area .btn-group .btn-paging.btn-info {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+  font-weight: var(--text-bold);
+}
+
+#navbar-breadcrumbs a {
+  color: rgb(57, 55, 55);
+}
+.for-forgot .auth-form .page-card .page-card-head img, .for-login .auth-form .page-card .page-card-head img {
+  max-height: 36px !important;
+}
+.for-login, .for-forgot, .for-login-with-email-link, .for-signup, .for-email-login {
+  padding: 0% !important;
+}
+
+.btn.btn-primary, div#driver-popover-item .driver-popover-footer button.btn-primary, div#driver-popover-item .driver-popover-footer button.driver-next-btn {
+  background-color: red !important;
+}

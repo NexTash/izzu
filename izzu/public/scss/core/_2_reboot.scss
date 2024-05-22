@@ -1,0 +1,34 @@
+:root,
+[data-theme="light"] {
+  --primary: rgb(74, 128, 238);
+  --secondary: rgb(39, 39, 238);
+  --secondary-color: var(--secondary);
+  --primary-color: var(--primary);
+  --btn-height: 28px;
+  --dark-green-avatar-color: #14005b;
+
+  // Checkbox
+  --checkbox-right-margin: var(--margin-xs);
+  --checkbox-size: 14px;
+  --checkbox-focus-shadow: 0 0 0 2px var(--gray-300);
+
+  --checkbox-gradient: linear-gradient(
+    180deg,
+    --secondary-color,
+    -124.51%,
+    var(--primary) 100%
+  );
+  
+
+  // fonts
+  --font-stack: "Almarai", "Inter", "-apple-system", "BlinkMacSystemFont",
+    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+
+  --font-family-sans-serif: "Almarai", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --font-family-monospace: "Almarai", SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}

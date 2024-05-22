@@ -1,0 +1,39 @@
+{% extends 'templates/base-login.html' %}
+{% block hero %}{% endblock %}
+
+{% block content %}
+
+{% macro main_content() %}
+<div class="page-content-wrapper">
+	<!-- breadcrumbs -->
+	{% block page_container %}
+	<main class="">
+		<div class="d-flex justify-content-between align-items-center"></div>
+
+		<div class="page_content">
+			{%- block page_content -%}{%- endblock -%}
+		</div>
+</main>
+	{% endblock %}
+</div>
+{% endmacro %}
+
+{% macro container_attributes() -%}
+id="page-{{ name or route | e }}" data-path="{{ pathname | e }}"
+{%- if page_or_generator=="Generator" %}source-type="Generator" data-doctype="{{ doctype }}"{%- endif %}
+{%- if source_content_type %}source-content-type="{{ source_content_type }}"{%- endif %}
+{%- endmacro %}
+
+{% macro sidebar() %}
+<div class="sidebar-column col-sm-{{ columns }}">
+	{% block page_sidebar %}
+	{% include "templates/includes/web_sidebar.html" %}
+	{% endblock %}
+</div>
+{% endmacro %}
+
+<div {{ container_attributes() }}>
+	{{ main_content() }}
+</div>
+
+{% endblock %}
