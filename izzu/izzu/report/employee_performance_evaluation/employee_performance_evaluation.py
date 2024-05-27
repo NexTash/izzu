@@ -10,7 +10,8 @@ def get_columns(filters):
         {
             "fieldname": "employee_name",
             "label": "Employee Name",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options": "Employee",
             "width": 250
         },
         {
@@ -76,12 +77,12 @@ def get_columns(filters):
         {
             "fieldname": "team_works",
             "label": "Team Works",
-            "fieldtype": "percent",
+            "fieldtype": "Data",
             "width": 300
         },
         {
             "fieldname": "comunication_skills",
-            "label": "Communication Skills",
+            "label": "Comunication Skills",
             "fieldtype": "Data",
             "width": 100
         },
@@ -114,12 +115,6 @@ def get_columns(filters):
             "label": "Training Date",
             "fieldtype": "Date",
             "width": 100
-        },
-        {
-            "fieldname": "overall_score",
-            "label": "Overall Score",
-            "fieldtype": "Float",  # Changed fieldtype to Float
-            "width": 100
         }
     ]
     return columns
@@ -130,69 +125,51 @@ def get_data(filters):
 
     if filters.get('employee_name'):
         emp_filters['employee_name'] = filters.get('employee_name')
-    
-    task_data = frappe.get_all('Task', filters=emp_filters, fields=["*"])
+
+    # Fetch and append data from Task doctype
+    task_data = frappe.get_list('Task', filters=emp_filters, fields=["*"])
     for task in task_data:
-        # Assign numerical values to task priorities
-        if task.priority.lower() == 'high':
-            task_priority = 100
-        elif task.priority.lower() == 'medium':
-            task_priority = 50
-        elif task.priority.lower() == 'low':
-            task_priority = 10
-        else:
-            task_priority = 0  # Assign a default value for other cases
-        
-        attendance_data = frappe.get_all('Attendance', filters=emp_filters, fields=["*"])
+        attendance_data = frappe.get_list('Attendance', filters=emp_filters, fields=["*"])
         for attendance in attendance_data:
-            performance_feedback = frappe.get_all('Employee Performance Feedback', filters=emp_filters, fields=["*"])
+            performance_feedback = frappe.get_list('Employee Performance Feedback', filters=emp_filters, fields=["*"])
+
             for feedback in performance_feedback:
-                feedback_ratings = frappe.get_all('Employee Feedback Rating', filters={'parent': feedback.name}, fields=["*"])
+                feedback_ratings = frappe.get_list('Employee Feedback Rating', filters={'parent': feedback.name}, fields=["*"])
+        
                 criteria_list = [rating.criteria for rating in feedback_ratings]
                 weightage_list = [rating.per_weightage for rating in feedback_ratings]
+
                 criteria_str = ", ".join(criteria_list)
                 weightage_str = ", ".join(map(str, weightage_list))
-                eco_data = frappe.get_all('Employee Performance on ECO', filters=emp_filters, fields=["*"])
+                eco_data = frappe.get_list('Employee Performance on ECO', filters=emp_filters, fields=["*"])
+    
                 for eco in eco_data:
-                    employee_skill_maps = frappe.get_all('Employee Skill Map', filters=emp_filters, fields=["*"])
-                    for skill_map in employee_skill_maps:
-                        skills = frappe.get_all('Employee Skill', filters={'parent': skill_map.name}, fields=["*"])
-                        trainings = frappe.get_all('Employee Training', filters={'parent': skill_map.name}, fields=["*"])
-                        for skill in skills:
-                            for training in trainings:
-                                # Convert attendance status to binary
-                                attendance_score = 1 if attendance.attendance_status == "Present" else 0
-                                # Normalize task priority
-                                task_score = int(task_priority) / 100
-                                # Assuming team_works, positive_attitude_overall, and skill_score are out of 100
-                                team_engagement_score = eco.team_works / 100 if eco.team_works is not None else 0
-                                # Handle non-numeric values for positive_attitude_overall
-                                try:
-                                    environmental_behavior_score = int(eco.positive_attitude_overall) / 100
-                                except ValueError:
-                                    environmental_behavior_score = 0
-                                # Calculate overall score
-                                overall_score = (task_score * 0.5) + (attendance_score * 0.1) + (team_engagement_score * 0.1) + (environmental_behavior_score * 0.2)
-                                # Append data to the dictionary
-                                data.append({
-                                    "employee_name": attendance.employee_name,
-                                    "status": task.status,
-                                    "project": task.project,
-                                    "priority": task_priority,  # Use converted priority
-                                    "company": attendance.company,
-                                    "department": attendance.department,
-                                    "attendance_status": attendance.status,
-                                    "attendance_date": attendance.attendance_date,
-                                    "feedback_criteria": criteria_str,
-                                    "feedback_weightage": weightage_str,
-                                    "total_score": feedback.total_score,
-                                    "team_works": eco.team_works,
-                                    "communication_skills": eco.communication_skills,  # Corrected field name
-                                    "positive_attitude_overall": eco.positive_attitude_overall,
-                                    "skill": skill.skill,
-                                    "evaluation_date": skill.evaluation_date,
-                                    "training": training.training,
-                                    "training_date": training.training_date,
-                                    "overall_score": overall_score  # Add overal  # Corrected
-                                })
+                     employee_skill_maps = frappe.get_list('Employee Skill Map', filters=emp_filters, fields=["*"])
+
+                for skill_map in employee_skill_maps:
+                    skills = frappe.get_list('Employee Skill', filters={'parent': skill_map.name}, fields=["*"])
+                    trainings = frappe.get_list('Employee Training', filters={'parent': skill_map.name}, fields=["*"])
+                    for skill in skills:
+                        for training in trainings:
+                            data.append({
+                            "employee": task.employee_name,
+                            "status": task.status,
+                            "project": task.project,
+                            "priority": task.priority,
+                            "company": attendance.company,
+                            "department": attendance.department,
+                            "attendance_status": attendance.status,
+                            "attendance_date": attendance.attendance_date,
+                            "feedback_criteria": criteria_str,
+                            "feedback_weightage": weightage_str,
+                            "total_score": feedback.total_score,
+                            "team_works": eco.team_works,
+                            "comunication_skills": eco.comunication_skills,
+                            "positive_attitude_overall": eco.positive_attitude_overall,
+                            "skill": skill.skill,
+                            "evaluation_date": skill.evaluation_date,
+                            "training": training.training,
+                            "training_date": training.training_date
+                        })    
     return data
+
