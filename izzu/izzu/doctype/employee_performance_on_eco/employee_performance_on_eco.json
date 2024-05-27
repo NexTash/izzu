@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "HR-PF-2024.########",
+ "creation": "2024-05-23 12:57:57.668264",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_name",
+  "energy_conversation",
+  "adherence_to_envirnoment",
+  "column_break_e7cn7",
+  "team_work",
+  "comunication_skills",
+  "section_break_x43pt",
+  "positive_attitude_overall"
+ ],
+ "fields": [
+  {
+   "fieldname": "energy_conversation",
+   "fieldtype": "Data",
+   "label": "Energy Conversation"
+  },
+  {
+   "fieldname": "adherence_to_envirnoment",
+   "fieldtype": "Data",
+   "label": "Adherence to Envirnoment"
+  },
+  {
+   "fieldname": "column_break_e7cn7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "team_work",
+   "fieldtype": "Percent",
+   "label": "Team Work%"
+  },
+  {
+   "fieldname": "comunication_skills",
+   "fieldtype": "Data",
+   "label": "Comunication Skills"
+  },
+  {
+   "fieldname": "section_break_x43pt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "positive_attitude_overall",
+   "fieldtype": "Text",
+   "label": "Positive Attitude Overall"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-05-27 12:15:09.796028",
+ "modified_by": "Administrator",
+ "module": "Izzu",
+ "name": "Employee Performance on ECO",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
