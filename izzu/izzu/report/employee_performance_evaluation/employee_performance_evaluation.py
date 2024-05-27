@@ -152,7 +152,7 @@ def get_data(filters):
                     for skill in skills:
                         for training in trainings:
                             data.append({
-                            "employee": task.employee_name,
+                            "employee_name": attendance.employee_name,
                             "status": task.status,
                             "project": task.project,
                             "priority": task.priority,
@@ -172,4 +172,3 @@ def get_data(filters):
                             "training_date": training.training_date
                         })    
     return data
-
