@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "employee",
   "employee_name",
   "energy_conversation",
   "adherence_to_envirnoment",
@@ -52,14 +53,21 @@
    "label": "Positive Attitude Overall"
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "label": "Employee Name"
+   "label": "Employee name"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-27 12:15:09.796028",
+ "modified": "2024-05-27 23:21:38.708258",
  "modified_by": "Administrator",
  "module": "Izzu",
  "name": "Employee Performance on ECO",

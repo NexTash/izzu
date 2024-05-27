@@ -75,7 +75,7 @@ def get_columns(filters):
             "width": 100
         },
         {
-            "fieldname": "team_works",
+            "fieldname": "team_work",
             "label": "Team Works",
             "fieldtype": "Data",
             "width": 300
@@ -120,55 +120,231 @@ def get_columns(filters):
     return columns
 
 def get_data(filters):
-    data = []
+    # data = []
     emp_filters = {}
 
-    if filters.get('employee_name'):
-        emp_filters['employee_name'] = filters.get('employee_name')
+    # Applying filter based on employee name
+    if filters.get("employee_name"):
+        emp_filters["name"] = filters.get("employee_name")
 
     # Fetch and append data from Task doctype
-    task_data = frappe.get_list('Task', filters=emp_filters, fields=["*"])
+    data = []
+    employee_data = {}
+    task_data = frappe.get_all('Employee', filters=emp_filters, fields=["*"])
+
     for task in task_data:
-        attendance_data = frappe.get_list('Attendance', filters=emp_filters, fields=["*"])
-        for attendance in attendance_data:
-            performance_feedback = frappe.get_list('Employee Performance Feedback', filters=emp_filters, fields=["*"])
+        # Fetch attendance documents for the employee
+        att_docs = frappe.get_all("Attendance", {"employee": task.name}, ["*"])
+        if task.name not in employee_data:
+            employee_data[task.name] = {
+                "employee_name": task.employee_name,
+                "company": task.company,
+                "department": task.department,
+                "attendance_records": [],
+                "feedback_ratings": [],
+                "employee_eco": []
+            }
 
-            for feedback in performance_feedback:
-                feedback_ratings = frappe.get_list('Employee Feedback Rating', filters={'parent': feedback.name}, fields=["*"])
+        # Append attendance data to the employee record
+        for att in att_docs:
+            employee_data[task.name]["attendance_records"].append({
+                "attendance_status": att.status,
+                "attendance_date": att.attendance_date,
+            })
+
+        # Fetch feedback documents for the employee
+        feed_docs = frappe.get_all("Employee Performance Feedback", {"employee": task.name}, ["*"])
+        for row in feed_docs:
+            doc = frappe.get_doc("Employee Performance Feedback", row.name)
+            for child in doc.feedback_ratings:
+                employee_data[task.name]["feedback_ratings"].append({
+                    "feedback_criteria": child.criteria,
+                    "feedback_weightage": child.per_weightage,
+                    "total_score": doc.total_score,
+                })
+
+                # Fetch ECO documents for the employee
+        eco_docs = frappe.get_all("Employee Performance on ECO", {"employee": task.name}, ["*"])
+        frappe.msgprint(f"{eco_docs}")
+        for eco in eco_docs:
+            employee_data[task.name]["employee_eco"].append({
+                "team_work": eco.team_work,
+                "comunication_skills": eco.comunication_skills,
+                "positive_attitude_overall": eco.positive_attitude_overall,
+            })
+    frappe.msgprint(f"{employee_data}")
+
+    # Convert the dictionary to a list of rows
+    for emp, emp_data in employee_data.items():
+        # Adding attendance data
+        for att in emp_data["attendance_records"]:
+            row = {
+                "employee_name": emp_data["employee_name"],
+                "company": emp_data["company"],
+                "department": emp_data["department"],
+                "attendance_status": att["attendance_status"],
+                "attendance_date": att["attendance_date"],
+            }
+            # Adding feedback data if available
+            for feedback in emp_data["feedback_ratings"]:
+                row.update({
+                    "feedback_criteria": feedback["feedback_criteria"],
+                    "feedback_weightage": feedback["feedback_weightage"],
+                    "total_score": feedback["total_score"],
+                })
+
+            if emp_data["employee_eco"]:
+                for abc in emp_data["employee_eco"]:
+                    row = {
+                        "team_work": abc["team_work"],
+                        "comunication_skills": abc["comunication_skills"],
+                        "positive_attitude_overall": abc["positive_attitude_overall"],
+                    }
+                data.append(row.copy())
+            else:
+                data.append(row)
+
+
+
+
+
+
+
+    # frappe.msgprint(f"{data}")
+        # for row in data:
+    # Initialize variables to store concatenated attendance and feedback data
+        # attendance_statuses = []
+        # attendance_dates = []
+        # feedback_criteria_list = []
+        # feedback_weightages = []
+        # total_scores = []
         
-                criteria_list = [rating.criteria for rating in feedback_ratings]
-                weightage_list = [rating.per_weightage for rating in feedback_ratings]
+        # # Process attendance records
+        # for row in att_docs:
+        #     attendance_statuses.append(row.status)
+        #     attendance_dates.append(str(row.attendance_date))
+        
+        # # Process feedback records
+        
+        # # Concatenate the lists into single strings
+        # concatenated_attendance_statuses = ', '.join(attendance_statuses)
+        # concatenated_attendance_dates = ', '.join(attendance_dates)
+        # concatenated_feedback_criteria = ', '.join(feedback_criteria_list)
+        # concatenated_feedback_weightages = ', '.join(feedback_weightages)
+        # concatenated_total_scores = ', '.join(total_scores)
+        
+        # # Append the aggregated data to the data list
+        # data.append({
+        #     "employee_name": task.employee_name,
+        #     "company": task.company,
+        #     "department": task.department,
+        #     "attendance_statuses": concatenated_attendance_statuses,
+        #     "attendance_dates": concatenated_attendance_dates,
+        #     "feedback_criteria": concatenated_feedback_criteria,
+        #     "feedback_weightages": concatenated_feedback_weightages,
+        #     "total_scores": concatenated_total_scores
+        # })
 
-                criteria_str = ", ".join(criteria_list)
-                weightage_str = ", ".join(map(str, weightage_list))
-                eco_data = frappe.get_list('Employee Performance on ECO', filters=emp_filters, fields=["*"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # for task in task_data:
+    #     my_dict = {}
+    #     att_status = ''
+    #     att_date = ''
+    #     att_docs = frappe.get_all("Attendance", {"employee": task.name}, ["*"])
+    #     for row in att_docs:
+    #         frappe.msgprint(f"{row}")
+    #         att_status = row.status
+    #         att_date = row.attendance_date
+    #         my_dict.update({
+    #             "attendance_status" : att_status,
+    #             "attendance_date" : att_date
+    #         })
+    #     feedback_criteria = ''
+    #     feedback_weightage = ''
+    #     total_score = ''
+    #     feed_docs = frappe.get_all("Employee Performance Feedback", {"employee" : task.name}, ["*"])
+    #     for row in feed_docs:
+    #         doc = frappe.get_doc("Employee Performance Feedback", row.name)
+    #         for child in doc.feedback_ratings:
+    #             feedback_criteria = child.criteria
+    #             feedback_weightage = child.per_weightage
+    #             total_score = doc.total_score
+    #     data.append({
+    #         "employee_name": task.employee_name,
+    #         # "status": task.status,
+    #         # "project": task.project,
+    #         # "priority": task.priority,
+    #         "company": task.company,
+    #         "department": task.department,
+    #         "attendance_status": att_status,
+    #         "attendance_date": att_date,
+    #         "feedback_criteria": feedback_criteria,
+    #         "feedback_weightage": feedback_weightage,
+    #         "total_score": total_score,
+    #         # "team_works": eco.team_works,
+    #         # "comunication_skills": eco.comunication_skills,
+    #         # "positive_attitude_overall": eco.positive_attitude_overall,
+    #         # "skill": skill.skill,
+    #         # "evaluation_date": skill.evaluation_date,
+    #         # "training": training.training,
+    #         # "training_date": training.training_date
+    #     })           
+        # attendance_data = frappe.get_all('Attendance', {"employee" : task.name}, fields=["*"])
+        # for attendance in attendance_data:
+        #     performance_feedback = frappe.get_all('Employee Performance Feedback', filters=emp_filters, fields=["*"])
+
+        #     for feedback in performance_feedback:
+        #         feedback_ratings = frappe.get_all('Employee Feedback Rating', filters={'parent': feedback.name}, fields=["*"])
+        
+        #         criteria_list = [rating.criteria for rating in feedback_ratings]
+        #         weightage_list = [rating.per_weightage for rating in feedback_ratings]
+
+        #         criteria_str = ", ".join(criteria_list)
+        #         weightage_str = ", ".join(map(str, weightage_list))
+        #         eco_data = frappe.get_list('Employee Performance on ECO', filters=emp_filters, fields=["*"])
     
-                for eco in eco_data:
-                     employee_skill_maps = frappe.get_list('Employee Skill Map', filters=emp_filters, fields=["*"])
+        #         for eco in eco_data:
+        #              employee_skill_maps = frappe.get_all('Employee Skill Map', filters=emp_filters, fields=["*"])
 
-                for skill_map in employee_skill_maps:
-                    skills = frappe.get_list('Employee Skill', filters={'parent': skill_map.name}, fields=["*"])
-                    trainings = frappe.get_list('Employee Training', filters={'parent': skill_map.name}, fields=["*"])
-                    for skill in skills:
-                        for training in trainings:
-                            data.append({
-                            "employee_name": attendance.employee_name,
-                            "status": task.status,
-                            "project": task.project,
-                            "priority": task.priority,
-                            "company": attendance.company,
-                            "department": attendance.department,
-                            "attendance_status": attendance.status,
-                            "attendance_date": attendance.attendance_date,
-                            "feedback_criteria": criteria_str,
-                            "feedback_weightage": weightage_str,
-                            "total_score": feedback.total_score,
-                            "team_works": eco.team_works,
-                            "comunication_skills": eco.comunication_skills,
-                            "positive_attitude_overall": eco.positive_attitude_overall,
-                            "skill": skill.skill,
-                            "evaluation_date": skill.evaluation_date,
-                            "training": training.training,
-                            "training_date": training.training_date
-                        })    
+        #         for skill_map in employee_skill_maps:
+        #             skills = frappe.get_all('Employee Skill', filters={'parent': skill_map.name}, fields=["*"])
+        #             trainings = frappe.get_all('Employee Training', filters={'parent': skill_map.name}, fields=["*"])
+        #             for skill in skills:
+        #                 for training in trainings:
+        #                     data.append({
+        #                     "employee_name": attendance.employee_name,
+        #                     "status": task.status,
+        #                     "project": task.project,
+        #                     "priority": task.priority,
+        #                     "company": attendance.company,
+        #                     "department": attendance.department,
+        #                     "attendance_status": attendance.status,
+        #                     "attendance_date": attendance.attendance_date,
+        #                     "feedback_criteria": criteria_str,
+        #                     "feedback_weightage": weightage_str,
+        #                     "total_score": feedback.total_score,
+        #                     "team_works": eco.team_works,
+        #                     "comunication_skills": eco.comunication_skills,
+        #                     "positive_attitude_overall": eco.positive_attitude_overall,
+        #                     "skill": skill.skill,
+        #                     "evaluation_date": skill.evaluation_date,
+        #                     "training": training.training,
+        #                     "training_date": training.training_date
+        #                 })    
     return data
