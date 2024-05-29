@@ -120,7 +120,6 @@ def get_columns(filters):
     return columns
 
 def get_data(filters):
-    # data = []
     emp_filters = {}
 
     # Applying filter based on employee name
@@ -133,26 +132,36 @@ def get_data(filters):
     task_data = frappe.get_all('Employee', filters=emp_filters, fields=["*"])
 
     for task in task_data:
-        # Fetch attendance documents for the employee
-        att_docs = frappe.get_all("Attendance", {"employee": task.name}, ["*"])
+        # Initialize employee data if not already present
         if task.name not in employee_data:
             employee_data[task.name] = {
                 "employee_name": task.employee_name,
                 "company": task.company,
                 "department": task.department,
+                "employee_task": [],
                 "attendance_records": [],
                 "feedback_ratings": [],
-                "employee_eco": []
+                "employee_eco": [],
+                "employee_skill": []
             }
+            task_docs = frappe.get_all("Task", {"user": task.user_id}, ["*"])
+        for tas in task_docs:
+            employee_data[task.name]["employee_task"].append({
+                "status": tas.status,
+                "project": tas.project,
+                "priority": tas.priority,
 
-        # Append attendance data to the employee record
+            })
+
+        # Fetch and append attendance documents for the employee
+        att_docs = frappe.get_all("Attendance", {"employee": task.name}, ["*"])
         for att in att_docs:
             employee_data[task.name]["attendance_records"].append({
                 "attendance_status": att.status,
                 "attendance_date": att.attendance_date,
             })
 
-        # Fetch feedback documents for the employee
+        # Fetch and append feedback documents for the employee
         feed_docs = frappe.get_all("Employee Performance Feedback", {"employee": task.name}, ["*"])
         for row in feed_docs:
             doc = frappe.get_doc("Employee Performance Feedback", row.name)
@@ -163,46 +172,86 @@ def get_data(filters):
                     "total_score": doc.total_score,
                 })
 
-                # Fetch ECO documents for the employee
+        # Fetch and append ECO documents for the employee
         eco_docs = frappe.get_all("Employee Performance on ECO", {"employee": task.name}, ["*"])
-        frappe.msgprint(f"{eco_docs}")
         for eco in eco_docs:
             employee_data[task.name]["employee_eco"].append({
                 "team_work": eco.team_work,
-                "comunication_skills": eco.comunication_skills,
+                "communication_skills": eco.communication_skills,  # Corrected typo
                 "positive_attitude_overall": eco.positive_attitude_overall,
             })
-    frappe.msgprint(f"{employee_data}")
+
+        # Fetch and append skill documents for the employee
+        skill_docs = frappe.get_all("Employee Skill Map", {"employee": task.name}, ["*"])
+        for skills in skill_docs:
+            skill_doc = frappe.get_doc("Employee Skill Map", skills.name)
+            for skill in skill_doc.employee_skills:
+                employee_data[task.name]["employee_skill"].append({
+                    "skill": skill.skill,
+                    "evaluation_date": skill.evaluation_date,
+                })
+            for training in skill_doc.trainings:
+                employee_data[task.name]["employee_skill"].append({
+                    "training": training.training,
+                    "training_date": training.training_date,
+                })
+
+    # Debugging message to check the final employee data structure
+    # frappe.msgprint(f"{employee_data[task.name]['employee_skill']}")
 
     # Convert the dictionary to a list of rows
     for emp, emp_data in employee_data.items():
-        # Adding attendance data
-        for att in emp_data["attendance_records"]:
+        for tas in emp_data["employee_task"]:
             row = {
+                "status": tas["status"],
+                "project": tas["project"],
+                "priority": tas["priority"],
+            }
+
+        for att in emp_data["attendance_records"]:
+            row.update ({
                 "employee_name": emp_data["employee_name"],
                 "company": emp_data["company"],
                 "department": emp_data["department"],
                 "attendance_status": att["attendance_status"],
                 "attendance_date": att["attendance_date"],
-            }
-            # Adding feedback data if available
-            for feedback in emp_data["feedback_ratings"]:
-                row.update({
-                    "feedback_criteria": feedback["feedback_criteria"],
-                    "feedback_weightage": feedback["feedback_weightage"],
-                    "total_score": feedback["total_score"],
-                })
+            })
+
+            if emp_data["feedback_ratings"]:
+                for feedback in emp_data["feedback_ratings"]:
+                    row.update({
+                        "feedback_criteria": feedback["feedback_criteria"],
+                        "feedback_weightage": feedback["feedback_weightage"],
+                        "total_score": feedback["total_score"],
+                    })
 
             if emp_data["employee_eco"]:
-                for abc in emp_data["employee_eco"]:
-                    row = {
-                        "team_work": abc["team_work"],
-                        "comunication_skills": abc["comunication_skills"],
-                        "positive_attitude_overall": abc["positive_attitude_overall"],
-                    }
-                data.append(row.copy())
-            else:
-                data.append(row)
+                for eco in emp_data["employee_eco"]:
+                    row.update({
+                        "team_work": eco["team_work"],
+                        "communication_skills": eco["communication_skills"],
+                        "positive_attitude_overall": eco["positive_attitude_overall"],
+                    })
+
+            # frappe.msgprint(f"{emp_data['employee_skill']}")
+            if emp_data["employee_skill"]:
+                for skill in emp_data["employee_skill"]:
+                    if "skill" in skill and "evaluation_date" in skill:
+                        row.update({
+                            "skill": skill["skill"],
+                            "evaluation_date": skill["evaluation_date"],
+                        })
+                    if "training" in skill and "training_date" in skill:
+                        row.update({
+                            "training": skill["training"],
+                            "training_date": skill["training_date"],
+                        })
+                    
+
+            data.append(row.copy())
+
+    return data
+
 
 
 
