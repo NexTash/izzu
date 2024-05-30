@@ -1,25 +1,25 @@
-/* ../../../../../tmp/tmp-18864-Bjre8F65HBZV/azgard9_ui/azgard9_ui/public/scss/azgard9_ui.bundle.css */
+/* ../../../../../tmp/tmp-18864-Bjre8F65HBZV/izzu_ui/izzu_ui/public/scss/izzu_ui.bundle.css */
 @font-face {
   font-family: "Almarai";
-  src: url(/assets/azgard9_ui/fonts//Almarai-Regular.ttf) format("truetype");
+  src: url(/assets/izzu_ui/fonts//Almarai-Regular.ttf) format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "Almarai";
-  src: url(/assets/azgard9_ui/fonts//Almarai-Bold.ttf) format("truetype");
+  src: url(/assets/izzu_ui/fonts//Almarai-Bold.ttf) format("truetype");
   font-weight: bold;
   font-style: normal;
 }
 @font-face {
   font-family: "Almarai";
-  src: url(/assets/azgard9_ui/fonts//Almarai-ExtraBold.ttf) format("truetype");
+  src: url(/assets/izzu_ui/fonts//Almarai-ExtraBold.ttf) format("truetype");
   font-weight: 800;
   font-style: normal;
 }
 @font-face {
   font-family: "Almarai";
-  src: url(/assets/azgard9_ui/fonts//Almarai-Light.ttf) format("truetype");
+  src: url(/assets/izzu_ui/fonts//Almarai-Light.ttf) format("truetype");
   font-weight: lighter;
   font-style: normal;
 }
@@ -116,4 +116,4 @@ div#driver-popover-item .driver-popover-footer button.focus.driver-next-btn {
 #navbar-breadcrumbs a {
   color: black;
 }
-/*# sourceMappingURL=azgard9_ui.bundle.W56TAASG.css.map */
+/*# sourceMappingURL=izzu_ui.bundle.W56TAASG.css.map */
