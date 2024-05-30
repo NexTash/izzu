@@ -23,6 +23,12 @@ frappe.query_reports["Sales invoice"] = {
             "options": "Customer",
             "width": 250
         },
+        {
+            "fieldname": "amount",
+            "label": __("Amount"),
+            "fieldtype": "Data",
+            "width": 250
+        }
        
 	]
 

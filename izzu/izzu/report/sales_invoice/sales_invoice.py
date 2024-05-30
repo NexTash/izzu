@@ -1,9 +1,11 @@
 import frappe
+from frappe import _
 
 def execute(filters=None):
     columns = get_columns(filters)
     data = get_data(filters)
-    return columns, data
+    chart = get_chart(data)
+    return columns, data, None, chart
 
 def get_columns(filters):
     columns = [
@@ -27,6 +29,12 @@ def get_columns(filters):
             "fieldtype": "Data",
             "width": 250
         },
+        {
+            "fieldname": "amount",
+            "label": "Amount",
+            "fieldtype": "Currency",
+            "width": 250
+        },
     ]
     return columns
 
@@ -36,34 +44,46 @@ def get_data(filters):
 
     if filters and filters.get('customer'):
         emp_filters['customer'] = filters.get('customer')
+    if filters and filters.get('amount'):
+        emp_filters['amount'] = filters.get('amount')
 
     if filters.get('start_date') and filters.get('end_date'):
         emp_filters['posting_date'] = ['between', [filters.get('start_date'), filters.get('end_date')]]
 
-
-    sales_invoices = frappe.get_list('Sales Invoice', filters=emp_filters, fields=["name", "customer"])
+    sales_invoices = frappe.get_list('Sales Invoice', filters=emp_filters, fields=["*"])
 
     for invoice in sales_invoices:
-        items = frappe.get_list('Sales Invoice Item', filters={'parent': invoice.name}, fields=["item_code","item_name"])
+        items = frappe.get_list('Sales Invoice Item', filters={'parent': invoice.name}, fields=["*"])
         
-        item_codes = [item.item_code for item in items]
-        item_names = [item.item_name for item in items]
-
-        item_codes_str = ", ".join(item_codes)
-        item_names_str = ", ".join(item_names)
-        
-        data.append({
-            "customer": invoice.customer,
-            "item_code": item_codes_str,
-            "item_name": item_names_str,
-        })
+        for item in items:
+                data.append({
+                    "customer": invoice.customer,
+                    "item_code": item.item_code,
+                    "item_name": item.item_name,
+                    "amount": item.amount,
+                })
 
     return data
 
+def get_chart(data):
+    if not data:
+        return None
 
+    labels = [row["customer"] for row in data]
+    values = [row["amount"] for row in data]
 
-# Combine the data into a single list
-# combined_data = task_data + attendance_data + performance_feedback + eco_data + employee_skill_maps + skills + trainings
+    chart = {
+        "data": {
+            "labels": labels,
+            "datasets": [{
+                "name": _("Amount"),
+                "values": values,
+                
 
-# Process each entry in the combined data
-# for entry in combined_data:
+            }]
+        },
+        "type": "bar",
+        "title": "Sales Invoice",
+
+    }
+    return chart
