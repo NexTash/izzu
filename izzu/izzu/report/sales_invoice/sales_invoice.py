@@ -82,7 +82,7 @@ def get_chart(data):
 
             }]
         },
-        "type": "bar",
+        "type": "pie",
         "title": "Sales Invoice",
 
     }
