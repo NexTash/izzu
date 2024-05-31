@@ -11,16 +11,12 @@ def execute(filters=None):
 def get_columns(filters):
     columns = []
 
-    # Include only specific fields
     specific_fields = ["customer", "item_code", "item_name", "amount"]
 
-    # Fetch metadata for Sales Invoice
     sales_invoice_meta = frappe.get_meta('Sales Invoice')
 
-    # Fetch metadata for child table Sales Invoice Item
     sales_invoice_item_meta = frappe.get_meta('Sales Invoice Item')
 
-    # Check for fields in Sales Invoice
     for field in sales_invoice_meta.fields:
         if field.fieldname in specific_fields:
             columns.append({
@@ -31,7 +27,6 @@ def get_columns(filters):
                 "width": 250
             })
 
-    # Check for fields in Sales Invoice Item
     for field in sales_invoice_item_meta.fields:
         if field.fieldname in specific_fields:
             columns.append({
@@ -69,7 +64,6 @@ def get_data(filters):
                     "item_name": item.item_name,
                     "amount": item.amount,
                 })
-        # frappe.msgprint(f"{item}")    
 
     return data
 
