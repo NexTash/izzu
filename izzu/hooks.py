@@ -39,7 +39,10 @@ app_include_js = "toolbar.bundle.js"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Task" : "public/js/task.js"}
+doctype_js = {"Task" : "public/js/task.js",
+            "Payment Entry" : "public/js/payment_entry.js",
+            "Sales Invoice" : "public/js/sales_invoice.js",
+            }
 doctype_list_js = {"ToDo" : "public/js/todo.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
