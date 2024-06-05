@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "stu_child.#####",
+ "creation": "2024-06-05 12:05:10.569233",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name1",
+  "class1",
+  "address"
+ ],
+ "fields": [
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address"
+  },
+  {
+   "fieldname": "class1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Class"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-06-05 12:17:27.328980",
+ "modified_by": "Administrator",
+ "module": "Izzu",
+ "name": "Stu Child",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
