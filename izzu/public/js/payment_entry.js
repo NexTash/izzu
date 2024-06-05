@@ -8,21 +8,5 @@ frappe.ui.form.on('Payment Entry', {
         .then(doc => {
             console.log(doc)
         })
-        // if(frm.doc.custom_sales_invoice){
-        //     frappe.db.get_doc('Sales Invoice', frm.doc.custom_sales_invoice)
-            
-        //     .then(doc => {
-        //         let barcode_text = doc.name;
-        //         if (isNaN(parseInt(barcode_text))) { // Check if barcode is an integer
-        //             frappe.model.set_value(dt, dn, "custom_sale_barcode", barcode_text);
-        //             frappe.msgprint(__(frm.doc.barcode_text));
-        //         } else {
-        //             frappe.show_alert('Barcode is not an integer.');
-        //         }
-        //     })
-        // } else {
-        //     // If no sales invoice is selected, clear the barcode field
-        //     frappe.model.set_value(dt, dn, "custom_sale_barcode", "");
-        // }
     }
 });
