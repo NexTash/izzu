@@ -2,8 +2,20 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
+// frappe.ui.form.on('Task', {
+//     refresh: function(frm) {
+//         frm.add_custom_button(__('Go to Student'), function() {
+//             frappe.set_route('List', 'Student');
+//         });
+
 frappe.ui.form.on('Task', {
-    validate: function(frm) {
+    refresh: function(frm) {
+        frm.add_custom_button(__('Go to Student'), function() {
+            var std = 'STUD0001';
+            frappe.set_route('Form', 'Student2', std);
+        });
+    
+
         frappe.db.get_list('ToDo', {
             fields: ['*'],
             filters: {
