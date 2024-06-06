@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "ORDER.####",
+ "creation": "2024-06-06 14:45:59.760508",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name1",
+  "phone",
+  "email",
+  "address",
+  "bouquet_type",
+  "bouquet_price",
+  "gift_wrapping",
+  "urgent_delivery"
+ ],
+ "fields": [
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "label": "Address"
+  },
+  {
+   "default": "0",
+   "fieldname": "gift_wrapping",
+   "fieldtype": "Check",
+   "label": "Gift Wrapping"
+  },
+  {
+   "default": "0",
+   "fieldname": "urgent_delivery",
+   "fieldtype": "Check",
+   "label": "Urgent Delivery"
+  },
+  {
+   "fieldname": "bouquet_type",
+   "fieldtype": "Data",
+   "label": "Bouquet Type"
+  },
+  {
+   "fieldname": "bouquet_price",
+   "fieldtype": "Data",
+   "label": "Bouquet Price"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-06 15:10:06.442378",
+ "modified_by": "Administrator",
+ "module": "Izzu",
+ "name": "Order Request",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
