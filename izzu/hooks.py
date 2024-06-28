@@ -146,18 +146,18 @@ scheduler_events = {
 	"all": [
 		"izzu.event.tasks.all_events_task"
 	],
-	# "daily": [
-	# 	"izzu.event.tasks.all_events_task"
-	# ],
-	# "hourly": [
-	# 	"izzu.event.tasks.all_events_task"
-	# ],
-	# "weekly": [
-	# 	"izzu.event.tasks.all_events_task"
-	# ],
-	# "monthly": [
-	# 	"izzu.event.tasks.all_events_task"
-	# ],
+	"daily": [
+		"izzu.event.tasks.all_events_task"
+	],
+	"hourly": [
+		"izzu.event.tasks.all_events_task"
+	],
+	"weekly": [
+		"izzu.event.tasks.all_events_task"
+	],
+	"monthly": [
+		"izzu.event.tasks.all_events_task"
+	],
 }
 
 # Testing
