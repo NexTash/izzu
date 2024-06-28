@@ -6,5 +6,4 @@ def execute():
     df2 = dict(fieldname="barcode", fieldtype="Data", label="Barcode", insert_after="section_break")
     create_custom_field("Sales Invoice", df)
     create_custom_field("Sales Invoice", df2)
-
     frappe.db.commit()
