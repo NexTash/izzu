@@ -133,34 +133,32 @@ after_migrate = "izzu.migrate.after_migrate"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Student": {
+		"before_save": "izzu.event.student.before_save",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-#	"all": [
-#		"aks_ui.tasks.all"
-#	],
-#	"daily": [
-#		"aks_ui.tasks.daily"
-#	],
-#	"hourly": [
-#		"aks_ui.tasks.hourly"
-#	],
-#	"weekly": [
-#		"aks_ui.tasks.weekly"
-#	],
-#	"monthly": [
-#		"aks_ui.tasks.monthly"
-#	],
-# }
+scheduler_events = {
+	"all": [
+		"izzu.event.tasks.all_events_task"
+	],
+	# "daily": [
+	# 	"izzu.event.tasks.all_events_task"
+	# ],
+	# "hourly": [
+	# 	"izzu.event.tasks.all_events_task"
+	# ],
+	# "weekly": [
+	# 	"izzu.event.tasks.all_events_task"
+	# ],
+	# "monthly": [
+	# 	"izzu.event.tasks.all_events_task"
+	# ],
+}
 
 # Testing
 # -------
@@ -230,3 +228,5 @@ after_migrate = "izzu.migrate.after_migrate"
 # auth_hooks = [
 #	"aks_ui.auth.validate"
 # ]
+
+fixtures = ["Custom Field"]

@@ -20,11 +20,6 @@
    "label": "Name"
   },
   {
-   "fieldname": "age",
-   "fieldtype": "Data",
-   "label": "Age"
-  },
-  {
    "fieldname": "grade",
    "fieldtype": "Data",
    "label": "Grade"
@@ -34,11 +29,16 @@
    "fieldtype": "Table",
    "label": "Stu Child",
    "options": "Stu Child"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "label": "Age"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-05 12:16:07.183482",
+ "modified": "2024-06-27 12:46:11.678019",
  "modified_by": "Administrator",
  "module": "Izzu",
  "name": "Student",
