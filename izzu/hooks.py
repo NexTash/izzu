@@ -158,6 +158,12 @@ scheduler_events = {
 	"monthly": [
 		"izzu.event.tasks.all_events_task"
 	],
+    
+	"cron": {
+        "0 0 * * MON": [
+            "izzu.izzu.report.accounts_payable_aging_report.accounts_payable_aging_report.send_data"
+        ]
+    }
 }
 
 # Testing
