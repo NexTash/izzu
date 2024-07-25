@@ -6,7 +6,7 @@
         <img
           class="app-logo"
           style="width: {{ navbar_settings.logo_width || 60 }}px"
-          src="/assets/izzu_ui/images/az-logo.svg"
+          src="/assets/izzu_ui/images/izzu-logo.png"
         />
       </a>
       <ul class="nav navbar-nav d-none d-sm-flex" id="navbar-breadcrumbs"></ul>
@@ -158,4 +158,4 @@
     });
   });
 })();
-//# sourceMappingURL=toolbar.bundle.EY4BIDXI.js.map
+//# sourceMappingURL=toolbar.bundle.MBWE3DV6.js.map

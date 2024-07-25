@@ -9,11 +9,11 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-app_logo_url = "/assets/izzu/images/az-logo.svg"
+app_logo_url = "/assets/izzu/images/izzu-logo.png"
 
 website_context = {
-    "favicon": "/assets/izzu/images/favicon.png",
-    "splash_image": "/assets/izzu/images/az-logo.svg",
+    "favicon": "/assets/izzu/images/izzu-login.png",
+    "splash_image": "/assets/izzu/images/izzu-logo.png",
 }
 
 
