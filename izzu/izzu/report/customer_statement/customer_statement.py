@@ -2,291 +2,169 @@ import frappe
 from frappe.utils import flt
 
 def execute(filters=None):
-    columns = get_columns()
-    data = get_data(filters)
-    return columns, data
+    if not filters:
+        filters = {}
+
+    from_date = filters.get("from_date")
+    to_date = filters.get("to_date")
+    customer_filter = filters.get("customer")
+
+    opening_balances = get_opening_balances(from_date, customer_filter)
+    transactions = get_transactions(from_date, to_date, customer_filter)
+
+    data = []
+    customers = set(opening_balances.keys()) | set(transactions.keys())
+
+    for customer in sorted(customers):
+        opening = opening_balances.get(customer, 0)
+        txns = transactions.get(customer, [])
+
+        customer_name = frappe.db.get_value("Customer", customer, "customer_name") or customer
+
+        if txns or opening != 0:
+            data.append({
+                "date": "",
+                "customer": customer,
+                "customer_name": customer_name,
+                "voucher_subtype": "",
+                "voucher_type": "",
+                "voucher_no": "",
+                "doc_ref": "<b>Opening Balance</b>",
+                "opening_balance": opening,
+                "debit": 0,
+                "credit": 0,
+                "balance": opening
+            })
+
+        total_debit = total_credit = 0
+        balance = opening
+
+        for txn in txns:
+            balance += flt(txn["debit"]) - flt(txn["credit"])
+            data.append({
+                "date": txn.get("posting_date"),
+                "customer": customer,
+                "customer_name": "",
+                "voucher_subtype": txn["voucher_subtype"],
+                "voucher_type": txn["voucher_type"],
+                "voucher_no": txn["voucher_no"],
+                "doc_ref": txn.get("doc_ref", ""),
+                "opening_balance": "",
+                "debit": txn["debit"],
+                "credit": txn["credit"],
+                "balance": balance
+            })
+            total_debit += flt(txn["debit"])
+            total_credit += flt(txn["credit"])
+
+        if txns or opening != 0:
+            data.append({
+                "date": "",
+                "customer": "",
+                "customer_name": "",
+                "voucher_subtype": "",
+                "voucher_type": "",
+                "voucher_no": "",
+                "doc_ref": "<b>Total</b>",
+                "opening_balance": "",
+                "debit": total_debit,
+                "credit": total_credit,
+                "balance": balance
+            })
+            data.append({"page_break": 0})
+
+    return get_columns(), data
+
+def get_opening_balances(from_date, customer_filter):
+    condition = "posting_date < %(from_date)s AND party_type = 'Customer'"
+    params = {"from_date": from_date}
+
+    if customer_filter:
+        condition += " AND party = %(customer)s"
+        params["customer"] = customer_filter
+
+    result = frappe.db.sql(f"""
+        SELECT party, SUM(debit - credit) AS opening_balance
+        FROM `tabGL Entry`
+        WHERE {condition}
+        GROUP BY party
+    """, params, as_dict=1)
+
+    return {row.party: flt(row.opening_balance) for row in result}
+
+def get_transactions(from_date, to_date, customer_filter):
+    condition = "posting_date BETWEEN %(from_date)s AND %(to_date)s AND party_type = 'Customer'"
+    params = {"from_date": from_date, "to_date": to_date}
+
+    if customer_filter:
+        condition += " AND party = %(customer)s"
+        params["customer"] = customer_filter
+
+    result = frappe.db.sql(f"""
+        SELECT party, voucher_type, voucher_subtype, voucher_no, posting_date,
+               SUM(debit) AS debit, SUM(credit) AS credit
+        FROM `tabGL Entry`
+        WHERE {condition}
+        GROUP BY voucher_type, voucher_no
+        HAVING SUM(debit) != SUM(credit)
+        ORDER BY party, posting_date
+    """, params, as_dict=1)
+
+    enriched = []
+    for gle in result:
+        details = ""
+        c_name = ""
+
+        if gle["voucher_type"] == "Sales Invoice":
+            si = frappe.db.get_value(
+                "Sales Invoice", gle["voucher_no"],
+                ["docstatus", "is_return", "customer_name", "remarks", "po_no"],
+                as_dict=True
+            )
+            if not si or si.docstatus == 2:
+                continue
+            if si.po_no:
+                details = f"PO: {si.po_no}"
+            elif si.remarks:
+                details = f"Remarks: {si.remarks}"
+            c_name = si.customer_name
+
+        elif gle["voucher_type"] == "Payment Entry":
+            pe = frappe.db.get_value(
+                "Payment Entry", gle["voucher_no"],
+                ["docstatus", "reference_no", "remarks", "party_name"],
+                as_dict=True
+            )
+            if not pe or pe.docstatus == 2:
+                continue
+            details = pe.reference_no or pe.remarks or ""
+            c_name = pe.party_name
+
+        elif gle["voucher_type"] == "Journal Entry":
+            je = frappe.db.get_value("Journal Entry", gle["voucher_no"], "user_remark")
+            if je:
+                details = je
+
+        gle["customer_name"] = c_name
+        gle["doc_ref"] = details or ""
+        enriched.append(gle)
+
+    grouped = {}
+    for row in enriched:
+        grouped.setdefault(row.party, []).append(row)
+
+    return grouped
 
 def get_columns():
     return [
-        {
-            "fieldname": "date",
-            "label": "Date",
-            "fieldtype": "Date",
-            "width": 120,
-            "align": "left"
-        },
-        {
-            "fieldname": "details",
-            "label": "Reference",
-            "fieldtype": "Data",
-            "width": 200,
-            "align": "left"
-        },
-        {
-            "fieldname": "transactions",
-            "label": "Tran Type",
-            "fieldtype": "Data",
-            "width": 150,
-            "align": "left"
-        },
-        {
-            "fieldname": "check_no",
-            "label": "Check Ref / LPO",
-            "fieldtype": "Data",
-            "width": 150,
-            "align": "left"
-        },
-        
-        # {
-        #     "fieldname": "currency",
-        #     "label": "Currency",
-        #     "fieldtype": "Data",
-        #     "width": 120,
-        #     "align": "left"
-        # },
-        # {
-        #     "fieldname": "return_status",
-        #     "label": "Remarks",
-        #     "fieldtype": "Data",
-        #     "width": 100,
-        #     "align": "left"
-        # },
-        {
-            "fieldname": "amount_dr",
-            "label": "Debit",
-            "fieldtype": "Data",
-            "width": 120,
-            "align": "right"
-        },
-        {
-            "fieldname": "amount_cr",
-            "label": "Credit",
-            "fieldtype": "Data",
-            "width": 120,
-            "align": "right"
-        },
-        {
-            "fieldname": "balance",
-            "label": "Balance",
-            "fieldtype": "Data",
-            "width": 120,
-            "align": "right"
-        }
+        {"label": "Date", "fieldname": "date", "fieldtype": "Date", "width": 120},
+        {"label": "Customer", "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 150},
+        {"label": "Customer Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 200},
+        {"label": "Voucher Subtype", "fieldname": "voucher_subtype", "fieldtype": "Data", "width": 120},
+        {"label": "Voucher No", "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 150},
+        {"label": "Doc Ref", "fieldname": "doc_ref", "fieldtype": "Data", "width": 200},
+        {"label": "Opening", "fieldname": "opening_balance", "fieldtype": "Currency", "width": 120},
+        {"label": "Debit", "fieldname": "debit", "fieldtype": "Currency", "width": 120},
+        {"label": "Credit", "fieldname": "credit", "fieldtype": "Currency", "width": 120},
+        {"label": "Balance", "fieldname": "balance", "fieldtype": "Currency", "width": 120},
     ]
-
-def get_opening_balance(filters):
-    conditions = ""
-    if filters.get("customer"):
-        conditions += " AND party = %(customer)s"
-    if filters.get("from_date"):
-        conditions += " AND posting_date < %(from_date)s"
-
-    opening_balance = frappe.db.sql(f"""
-        SELECT
-            SUM(debit) - SUM(credit) as opening_balance
-        FROM
-            `tabGL Entry`
-        WHERE
-            docstatus = 1
-            AND party_type = 'Customer'
-            {conditions}
-    """, filters, as_dict=True)
-
-    opening_balance_value = opening_balance[0].opening_balance if opening_balance else 0
-    
-    if opening_balance_value is None or opening_balance_value == 0 or opening_balance_value != opening_balance_value:
-        return ""
-    
-    return opening_balance_value
-
-def format_currency(value):
-    if value is None:
-        return ""
-    return "{:,.2f}".format(value) if value else ""
-
-def get_exchange_rate(from_currency, to_currency, date):
-    exchange_rate = frappe.db.get_value("Currency Exchange", 
-                                        {"from_currency": from_currency, "to_currency": to_currency, "date": ["<=", date]}, 
-                                        "exchange_rate")
-    if not exchange_rate:
-        exchange_rate = frappe.db.get_value("Currency Exchange", 
-                                            {"from_currency": from_currency, "to_currency": to_currency}, 
-                                            "exchange_rate")
-    return flt(exchange_rate) if exchange_rate else 1.0 
-
-def convert_currency(amount, from_currency, to_currency, date):
-    if from_currency == to_currency:
-        return amount
-    exchange_rate = get_exchange_rate(from_currency, to_currency, date)
-    return amount / exchange_rate
-
-def get_data(filters):
-    default_currency = frappe.get_value("Company", filters.get("company"), "default_currency")
-    opening_balance = get_opening_balance(filters)
-    previous_balance = opening_balance
-
-    balance = previous_balance 
-    total_cr = 0
-    total_dt = 0
-
-    conditions = ""
-    if filters.get("customer"):
-        conditions += " AND party = %(customer)s"
-    if filters.get("from_date"):
-        conditions += " AND posting_date >= %(from_date)s"
-    if filters.get("to_date"):
-        conditions += " AND posting_date <= %(to_date)s"
-        
-       
-    gl_entries = frappe.db.sql(f"""
-        SELECT
-            posting_date,
-            voucher_type,
-            voucher_no,
-            due_date,
-            debit,
-            credit,
-            account_currency
-        FROM
-            `tabGL Entry`
-        WHERE
-            docstatus = 1
-            AND party_type = 'Customer'
-            {conditions}
-        ORDER BY
-            posting_date ASC, voucher_type ASC, voucher_no ASC
-    """, filters, as_dict=True)
-
-    data = []
-    processed_entries = set()
-    processed_references = set()
-
-    data.append({
-        "date": filters.get('from_date'),
-        "transactions": "",
-        "details": "",
-        "check_no": "Opening Balance",
-        # "return_status": "",
-        "amount_dr": "",
-        "amount_cr": "",
-        "balance": format_currency(opening_balance)
-    })
-
-    if filters.get("customer"):
-        cbc = frappe.db.get_value("Customer", filters.get("customer"), ["default_currency"]) 
-    if not cbc:
-        cbc = default_currency
-    for entry in gl_entries:
-        transactions = ""
-        # return_status = ""
-        details = ""
-        check_no = ""
-        amount_cr = entry['credit'] or 0
-        amount_dr = entry['debit'] or 0
-
-       
-        if entry['account_currency'] and entry['account_currency'] != default_currency:
-            amount_cr = convert_currency(amount_cr, entry['account_currency'], default_currency, entry['posting_date'])
-            amount_dr = convert_currency(amount_dr, entry['account_currency'], default_currency, entry['posting_date'])
-
-        if entry['voucher_no'] in processed_references:
-            continue
-
-        if entry['voucher_type'] == "Sales Invoice":
-            status = frappe.db.get_value("Sales Invoice", ['docstatus'])
-            if status == 2:
-                continue
-            
-            if entry['voucher_type'] == "Sales Invoice":
-                status, is_return = frappe.db.get_value("Sales Invoice", entry['voucher_no'], ['docstatus', 'is_return'])
-                
-                if status == 2:
-                    continue
-                
-                if is_return:
-                    transactions = f"{entry['voucher_type']} (Credit MEMO)"
-                else:
-                    transactions = entry['voucher_type']
-                
-                details = f"{entry['voucher_no']}"
-                        
-        elif entry['voucher_type'] == "Payment Entry":
-            if entry['voucher_no'] in processed_entries:  # Skip if already processed
-                continue
-            
-            pe_doc = frappe.get_doc("Payment Entry", entry['voucher_no'])
-            if pe_doc.docstatus == 2:
-                continue
-
-            # Add the payment entry name to the processed set
-            processed_entries.add(entry['voucher_no'])
-            
-            paid_amount = pe_doc.get('paid_amount', 0.0)
-            # mode_of_payment = pe_doc.get('mode_of_payment', '')
-            # cheque_no = pe_doc.get('cheque_no', pe_doc.get('reference_no', ''))
-
-            # references = frappe.get_all("Payment Entry Reference", filters={"parent": entry['voucher_no']}, fields=["reference_name"])
-            # reference_names = [ref['reference_name'] for ref in references]
-            transactions = entry['voucher_type']
-            check_no = pe_doc.reference_no or ""
-            details = f"{entry['voucher_no']}"
-            
-            # if mode_of_payment:
-            #     details += f", Mode of Payment: {mode_of_payment}"
-
-            # if cheque_no:
-            #     details += f", Cheque No./Reference: {cheque_no}"
-            
-            # if reference_names:
-            #     details += f", {', '.join(reference_names)}"
-            
-            amount_cr = paid_amount
-            
-
-        elif entry['voucher_type'] == "Journal Entry":
-            je_doc = frappe.get_doc("Journal Entry", entry['voucher_no'])
-            if je_doc.docstatus == 2:
-                continue
-            
-            # reference_number = je_doc.get('reference_number', '')
-            # user_remark = je_doc.get('user_remark', '')
-            transactions = entry['voucher_type']
-            details = f"{entry['voucher_no']}"
-            
-            # if reference_number:
-            #     details += f" Reference Number: {reference_number}"
-            
-            # if user_remark:
-            #     if reference_number:
-            #         details += f", User Remark: {user_remark}"
-            #     else:
-            #         details += f" User Remark: {user_remark}"
-
-        total_cr += amount_cr
-        total_dt += amount_dr
-        balance = (previous_balance or 0) + (amount_dr - amount_cr)
-
-        data.append({
-            "date": entry['posting_date'],
-            "transactions": transactions,
-            "details": details,
-            "check_no": check_no,
-            "currency":cbc,
-            # "return_status": return_status,
-            "amount_dr": format_currency(amount_dr),
-            "amount_cr": format_currency(amount_cr),
-            "balance": format_currency(balance)
-        })
-
-        previous_balance = balance
-        processed_references.add(entry['voucher_no'])
-
-    data.append({
-        "details": "",
-        "check_no": "Total :",
-        "amount_dr": format_currency(total_dt),
-        "amount_cr": format_currency(total_cr),
-        "balance": format_currency(balance)
-    })
-
-    return data

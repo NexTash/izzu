@@ -1,205 +1,159 @@
 <style>
-	body {
-		font-family: Arial, sans-serif;
-		font-weight: 600;
-	}
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+    }
 
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 10px;
-	}
+    .header {
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
 
-	.company-details {
-		text-align: left;
-	}
+    .sub-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
 
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+        font-size: 12px;
+    }
 
-	.company-details p {
-		margin: 5px 0;
-	}
+    th, td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: right;
+    }
 
-	.logo {
-		text-align: center;
-	}
+    th:first-child, td:first-child {
+        text-align: left;
+    }
 
-	.logo img {
-		height: 100% !important;
-		width: 100% !important;
-	}
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(3), td:nth-child(3) {
+        text-align: center;
+    }
 
-	.right-section {
-		text-align: right;
-	}
+    .page-break {
+        page-break-after: always;
+    }
 
-	.right-section p {
-		margin: 5px 0;
-	}
+    .totals td {
+        font-weight: bold;
+    }
 
-	.date-range {
-		text-align: start;
-		margin-top: 20px;
-	}
+    .meta-info {
+        text-align: left;
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
 
+    .print-format td, .print-format th {
+        padding: 6px !important;
+    }
 
-	.print-format .table-bordered thead {
-		border-top: 2px solid black;
-	}
-
-	.print-format .table-bordered thead {
-		border-bottom: 2px solid black;
-	}
-
-	.print-format .table-bordered th {
-		color: black;
-		font-weight: bold;
-	}
-
-
-	/* Print-specific styles */
-	@media print {
-		body {
-			font-family: Arial, sans-serif;
-			font-weight: 600;
-			color-adjust: exact;
-			/* Ensures consistent color rendering */
-		}
-
-		.header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 10px;
-		}
-
-
-		.logo img {
-			height: 100%;
-		}
-
-		.right-section {
-			text-align: right;
-		}
-
-
-
-		/* Remove default print margins */
-		@page {
-			margin: 0;
-		}
-
-		/* Avoid page breaks within sections */
-		.header,
-		.date-range,
-		.statement-title {
-			page-break-inside: avoid;
-		}
-	}
-
-	.table tbody tr:last-child td:last-child,
-	.table tbody tr:last-child td:nth-last-child(2),
-	.table tbody tr:last-child td:nth-last-child(3) {
-		border-style: solid !important;
-		border-width: 7px !important;
-		border-color: white !important;
-		border-top: 6px double #000 !important;
-	}
+    @media print {
+        /* .page:first-of-type {
+            display: none;
+        } */
+    }
 </style>
 
+{% /* Group data by customer */ %}
+{% let groupedData = {}; %}
+{% data.forEach(row => {
+    if (!groupedData[row.customer]) {
+        groupedData[row.customer] = [];
+    }
+    groupedData[row.customer].push(row);
+}); %}
 
-<div class="header">
-	<div class="company-details">
-		<b>{{ JSON.parse(localStorage.getItem('company'))?.name || "" }}</b><br>
-		{{ JSON.parse(localStorage.getItem('company_address'))?.address || "" }}<br>
-		Tel:{{ JSON.parse(localStorage.getItem('company'))?.phone || "" }}<br>
-		<a href="mailto:{{ JSON.parse(localStorage.getItem('company'))?.email || "" }}">{{
-			JSON.parse(localStorage.getItem('company'))?.email || "" }}</a><br>
-		<a href="{{ JSON.parse(localStorage.getItem('company'))?.website || '' }}">{{
-			JSON.parse(localStorage.getItem('company'))?.website || "" }}</a><br>
-	</div>
-	<div class="logo">
-		<img src="/assets/emkan_ui/images/logo.png" alt="Logo">
-	</div>
-	<div class="right-section">
-		<p>Date: {{ localStorage.getItem("current_date") || "" }}</p>
-		<p>User: {{ localStorage.getItem("session_user") || "" }}</p>
+{% let printed_page_number = 1; %}
 
-	</div>
-</div>
+{% /* Loop through each customer group */ %}
+{% Object.keys(groupedData).forEach((customer, idx) => { %}
+    {% /* If index is 1 or 2 (i.e. second or third page), skip rendering */ %}
+    {% if (idx === 1 || idx === 2) { %}
+        {% return; %}
+    {% } %}
 
-<div class="statement-title">
-	<h2 style="text-align: center;">CUSTOMER STATEMENT OF ACCOUNT</h2>
-</div>
+    {% let rows = groupedData[customer]; %}
+    {% let total_debit = 0; %}
+    {% let total_credit = 0; %}
+    {% let total_balance = 0; %}
 
-<div class="date-range">
-	<p>&nbsp;&nbsp;&nbsp;&nbsp;From: {{
-		new Date(JSON.parse(localStorage.getItem("from_date"))?.from_date || "").toLocaleDateString("en-GB", {
-		day: '2-digit',
-		month: '2-digit',
-		year: 'numeric'
-		})
-		}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; To: {{
-		new Date(JSON.parse(localStorage.getItem("to_date"))?.to_date || "").toLocaleDateString("en-GB", {
-		day: '2-digit',
-		month: '2-digit',
-		year: 'numeric'
-		})
-		}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Customer ID: {{ JSON.parse(localStorage.getItem("customer"))?.id || ""
-		}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		Customer Name: {{ JSON.parse(localStorage.getItem("customer"))?.name || "" }}</p>
-</div>
+    <div class="page">
+        <img style="width: 100%;" src="/assets/alhaya_formats/images/header1.png" alt="Logo" />
 
-<table class="table table-bordered ">
-	<thead class="t-head bordr-bottom border-top">
-		<tr>
-			<th>#</th>
-			{% for col in columns %}
-			{% if col.name && col._id !== "_check" && col.fieldname !== "currency" %}
-			<th {% if col.minWidth %} style="min-width: {{ col.minWidth }}px" {% endif %} {% if col.docfield &&
-				frappe.model.is_numeric_field(col.docfield) %} class="text-right" {% endif %}>
-				{{ __(col.name) }}
-			</th>
-			{% endif %}
-			{% endfor %}
-		</tr>
-	</thead>
-	<tbody class="tbody">
-		{% for row in data %}
-		<tr style="height: 30px;">
-			<td {% if row.bold==1 %} style="font-weight: bold" {% endif %}>
-				<span>{{ row._index + 1 }}</span>
-			</td>
-			{% for col in columns %}
-			{% if col.name && col._id !== "_check" && col.fieldname !== "currency" %}
-			{% var value = col.fieldname ? row[col.fieldname] : row[col.id] %}
-			{% var longest_word = cstr(value).split(' ').reduce((longest, word) => word.length > longest.length ? word :
-			longest, ''); %}
-			<td {% if row.bold==1 %} style="font-weight: bold" {% endif %} {% if longest_word.length> 45 %}
-				class="overflow-wrap-anywhere" {% endif %}>
-				<span {% if col._index==0 %} style="padding-left: {%= cint(row.indent) * 2 %}em" {% endif %}>
-					{% format_data = row.is_total_row && ["Currency", "Float"].includes(col.fieldtype) ? data[0] : row
-					%}
-					{% if (row.is_total_row && col._index == 0) { %}
-					{{ __("Total") }}
-					{% } else { %}
-					{{
-					col.formatter
-					? col.formatter(row._index, col._index, value, col, format_data, true)
-					: col.format
-					? col.format(value, row, col, format_data)
-					: col.docfield
-					? frappe.format(value, col.docfield)
-					: value
-					}}
-					{% } %}
-				</span>
-			</td>
-			{% endif %}
-			{% endfor %}
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
+        <div class="sub-header">
+            <div>
+                <p><strong>From Date:</strong> {{ frappe.format(filters.from_date, {"fieldtype": "Date"}) }}</p>
+                <p><strong>To Date:</strong> {{ frappe.format(filters.to_date, {"fieldtype": "Date"}) }}</p>
+            </div>
+            <div>
+                <h2 style="background-color: #d3d2d2; padding: 2px 6px;">STATEMENT OF ACCOUNTS</h2>
+            </div>
+            <div class="meta-info">
+                
+                <p><strong>Print Date:</strong> {{ frappe.datetime.nowdate() }}</p>
+                <p><strong>Print Time:</strong> {{ frappe.datetime.now_time() }}</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <td style="text-align: end;"><strong>Customer ID:</strong></td>
+                    <td style="text-align: start;">{{ customer }}</td>
+                    <td style="text-align: end;"><strong>Customer Name:</strong></td>
+                    <td colspan="4" style="text-align: start;">{{ rows[0].customer_name }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Date</strong></td>
+                    <td><strong>Doc Type</strong></td>
+                    <td><strong>Voucher No.</strong></td>
+                    <td style="text-align: start;"><strong>Doc Ref.</strong></td>
+                    <td><strong>Dr.</strong></td>
+                    <td><strong>Cr.</strong></td>
+                    <td><strong>Balance</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% rows.forEach(row => { %}
+                    {% total_debit += row.debit || 0; %}
+                    {% total_credit += row.credit || 0; %}
+                    {% total_balance = row.balance || 0; %}
+                    <tr>
+                        <td style="text-align: left;">{{ frappe.format(row.date, { fieldtype: "Date" }) }}</td>
+                        <td style="text-align: left;">{{ row.voucher_subtype }}</td>
+                        <td style="text-align: left;">{{ row.voucher_no }}</td>
+                        <td style="text-align: left;">{{ row.doc_ref }}</td>
+                        <td>{{ frappe.format(row.debit, { fieldtype: "Currency" }) }}</td>
+                        <td>{{ frappe.format(row.credit, { fieldtype: "Currency" }) }}</td>
+                        <td>{{ frappe.format(row.balance, { fieldtype: "Currency" }) }}</td>
+                    </tr>
+                {% }); %}
+
+                <tr class="totals">
+                    <td colspan="4"><strong>Total (O.B + Debit - Credit)</strong></td>
+                    <td><strong>{{ frappe.format(total_debit, { fieldtype: "Currency" }) }}</strong></td>
+                    <td><strong>{{ frappe.format(total_credit, { fieldtype: "Currency" }) }}</strong></td>
+                    <td><strong>{{ frappe.format(total_balance, { fieldtype: "Currency" }) }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        {% /* Insert page break if not the last available page */ %}
+        {% if (idx < Object.keys(groupedData).length - 1) { %}
+            <div class="page-break"></div>
+        {% } %}
+    </div>
+{% printed_page_number += 1; %}
+
+{% }); %}

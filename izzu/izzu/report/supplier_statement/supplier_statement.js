@@ -1,222 +1,28 @@
-// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2025, nexyash and contributors
+// For license information, please see license.txt
 
 frappe.query_reports["Supplier Statement"] = {
-    filters: [
+    "filters": [
         {
-            fieldname: "party_type",
-            label: __("Party Type"),
-            fieldtype: "Select",
-            options: [
-                { "value": "Supplier", "label": __("Supplier") }
-            ],
-            default: "Supplier",
-            hidden: 1,
-            // on_change: function () {
-            //     frappe.query_report.set_filter_value("party", "");
-            // }
+            "fieldname": "from_date",
+            "label": __("From Date"),
+            "fieldtype": "Date",
+            "default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+            "reqd": 1
         },
         {
-            fieldname: "party",
-            label: __("Supplier"),
-            fieldtype: "Link",
-            options: "Supplier",
-            // get_data: function (txt) {
-            //     return frappe.db.get_link_options("Supplier", txt);
-            // },
-
-            on_change: function () {
-                let parties = frappe.query_report.get_filter_value("party");
-                // if (parties.length === 0 || parties.length > 1) {
-                //     console.log(parties);
-                    
-                //     frappe.query_report.set_filter_value("party_name", "");
-                //     // frappe.query_report.set_filter_value("tax_id", "");
-                // } else {
-                //     let party = parties[0];
-                //     frappe.db.get_value("Supplier", party, ["name", "tax_id"], function (value) {
-                //         frappe.query_report.set_filter_value("party_name", value.name);
-                //         // frappe.query_report.set_filter_value("tax_id", value.tax_id);
-                //     });
-
-                    // let supplier = frappe.query_report.get_filter_value('supplier');
-                    if (parties) {
-                        frappe.db.get_doc('Supplier', parties).then(supplier_doc => {
-                            localStorage.setItem("supplier", JSON.stringify({
-                                id: supplier_doc.name,
-                                name: supplier_doc.supplier_name,
-                            }));
-
-                            if (supplier_doc.default_currency) {
-                                localStorage.setItem("supplier_currency", JSON.stringify({
-                                    currency: supplier_doc.default_currency,
-                                }));
-                            } else {
-                                let company = frappe.query_report.get_filter_value('company');
-                                if (company) {
-                                    frappe.db.get_doc('Company', company).then(company_doc => {
-                                        localStorage.setItem("supplier_currency", JSON.stringify({
-                                            currency: company_doc.default_currency,
-                                        }));
-                                    });
-                                }
-                            }
-
-                            if (supplier_doc.supplier_primary_address) {
-                                frappe.db.get_doc('Address', supplier_doc.supplier_primary_address)
-                                    .then(address_doc => {
-                                        let address_parts = [
-                                            address_doc.address_line1 || "",
-                                            address_doc.address_line2 || "",
-                                            address_doc.city || "",
-                                            address_doc.country || ""
-                                        ];
-                                        let full_address = address_parts.filter(Boolean).join('<br>');
-                                        localStorage.setItem("supplier_address", JSON.stringify({
-                                            address: full_address
-                                        }));
-                                    });
-                            } else {
-                                localStorage.setItem("supplier_address", JSON.stringify({
-                                    address: ''
-                                }));
-                            }
-
-                            if (supplier_doc.supplier_primary_contact) {
-                                frappe.db.get_doc('Contact', supplier_doc.supplier_primary_contact)
-                                    .then(contact_doc => {
-                                        let phone_no = contact_doc.phone_nos?.find(row => row.is_primary_phone)?.phone || "";
-                                        let email_id = contact_doc.email_ids?.find(row => row.is_primary)?.email_id || "";
-                                        setTimeout(() => {
-                                            localStorage.setItem("supplier_contact", JSON.stringify({
-                                                phone: phone_no,
-                                                email: email_id
-                                            }));
-                                        }, 500);
-                                    });
-                            } else {
-                                setTimeout(() => {
-                                    localStorage.setItem("supplier_contact", JSON.stringify({
-                                        phone: '',
-                                        email: ''
-                                    }));
-                                }, 500);
-                            }
-                        });
-                    } else {
-                        localStorage.removeItem("supplier");
-                        localStorage.removeItem("supplier_address");
-                        localStorage.removeItem("supplier_contact");
-                    }
-                }
-            
+            "fieldname": "to_date",
+            "label": __("To Date"),
+            "fieldtype": "Date",
+            "default": frappe.datetime.get_today(),
+            "reqd": 1
         },
         {
-            fieldname: "from_date",
-            label: __("From Date"),
-            fieldtype: "Date",
-            width: 100,
-            default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
-            on_change: function(report) {
-                let from_date = frappe.query_report.get_filter_value('from_date');
-                localStorage.setItem("from_date", JSON.stringify({ from_date: from_date || {} }));
-                report.refresh();
-            }
-        },
-        {
-            fieldname: "to_date",
-            label: __("To Date"),
-            fieldtype: "Date",
-            width: 100,
-            default: frappe.datetime.get_today(),
-            on_change: function(report) {
-                let to_date = frappe.query_report.get_filter_value('to_date');
-                localStorage.setItem("to_date", JSON.stringify({ to_date: to_date || {} }));
-                report.refresh();
-            }
-        },
-        {
-            fieldname: "company",
-            label: __("Company"),
-            fieldtype: "Link",
-            options: "Company",
-            width: 100,
-            reqd: 1,
-            default: frappe.defaults.get_user_default("Company"),
-            on_change: function(report) {
-                let company = frappe.query_report.get_filter_value('company');
-                if (company) {
-                    frappe.db.get_list('Dynamic Link', {
-                        filters: {
-                            link_doctype: "Company",
-                            link_name: company,
-                            link_title: company
-                        },
-                        fields: ['parent']
-                    }).then(records => {
-                        let office_address = "";
-                        if (records?.length) {
-                            frappe.db.get_doc('Address', records[0].parent).then(address_doc => {
-                                if (address_doc.address_type === "Office") {
-                                    let address_parts = [
-                                        address_doc.address_line1 || "",
-                                        address_doc.address_line2 || "",
-                                        address_doc.city || "",
-                                        address_doc.country || ""
-                                    ];
-                                    office_address = address_parts.filter(Boolean).join('<br>');
-                                    localStorage.setItem("company_address", JSON.stringify({
-                                        address: office_address
-                                    }));
-                                }
-                            });
-                        }
-                    });
-
-                    frappe.db.get_doc('Company', company).then(company_doc => {
-                        localStorage.setItem("company", JSON.stringify({
-                            name: company_doc.name,
-                            phone: company_doc.phone_no,
-                            email: company_doc.email,
-                            website: company_doc.website,
-                        }));
-                    });
-                } else {
-                    localStorage.setItem("company", JSON.stringify({}));
-                    localStorage.setItem("company_address", JSON.stringify({}));
-                }
-                report.refresh();
-            }
-        },
-        {
-            fieldname: "group_by",
-            label: __("Group by"),
-            fieldtype: "Select",
-            options: [
-                "",
-                { label: __("Group by Voucher"), value: "Group by Voucher" },
-                { label: __("Group by Voucher (Consolidated)"), value: "Group by Voucher (Consolidated)" },
-                { label: __("Group by Account"), value: "Group by Account" },
-                { label: __("Group by Party"), value: "Group by Party" },
-            ],
-            default: "Group by Voucher (Consolidated)",
-            hidden: 1
-        },
-    ],
-    onload: function (report) {
-        let to_date = frappe.query_report.get_filter_value('to_date');
-        localStorage.setItem("to_date", JSON.stringify({ to_date: to_date || {} }));
-
-        setTimeout(() => {
-            localStorage.setItem("current_date", new Date().toISOString().split('T')[0]);
-            frappe.db.get_doc('User', frappe.session.user).then(doc => {
-                localStorage.setItem("session_user", doc.full_name);
-            });
-            $('[data-fieldname="vehicle"]').hide();
-        }, 100);
-        report.refresh();
-    },
+            "fieldname": "supplier",
+            "label": __("Supplier"),
+            "fieldtype": "Link",
+            "options": "Supplier",
+            "reqd": 0
+        }
+    ]
 };
-
-erpnext.utils.add_dimensions("Supplier Statement", 15);
- 
